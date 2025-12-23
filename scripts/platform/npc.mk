@@ -25,7 +25,9 @@ image: image-dep
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
+AM_KERNEL_PATH := /home/bekzat/chip_bootcamp/am-kernels
+TESTER_PATH := /home/bekzat/chip_bootcamp/miniRV
 run: insert-arg
-	echo "TODO: add command here to run simulation"
+	$(TESTER_PATH)/obj_dir/VminiRV bin $(IMAGE).bin
 
 .PHONY: insert-arg

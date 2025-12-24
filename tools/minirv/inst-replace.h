@@ -1,6 +1,8 @@
 #if 0
 Base instructions:
 * add, addi, lui, lw, lbu, sw, sb, jalr
+Added instructions:
+* slli, srli, srai
 
 Assumption:
 * compiler do not use tp and gp
@@ -523,43 +525,43 @@ LABEL_NAME:
 .endm
 
 
-.macro slli rd, rs1, imm
-  .if \imm == 0
-    .if \rd != \rs1
-      mv \rd, \rs1
-    .endif
-    .exitm
-  .endif
-  .if \imm >= 24
-    sw x0, SP_VAR(VAR_A)
-    sb \rs1, SP_VAR_BYTE(VAR_A, 3)
-    lw \rd, SP_VAR(VAR_A)
-    slli \rd, \rd, (\imm - 24)
-    .exitm
-  .endif
-  .if \imm >= 16
-    sw x0, SP_VAR(VAR_A)
-    sh \rs1, SP_VAR_BYTE(VAR_A, 2)
-    lw \rd, SP_VAR(VAR_A)
-    slli \rd, \rd, (\imm - 16)
-    .exitm
-  .endif
-  SET_DEBUG_LABEL(slli)
-  add \rd, \rs1, \rs1
-  .rept (\imm - 1)
-    add \rd, \rd, \rd
-  .endr
-.endm
+// .macro slli rd, rs1, imm
+//   .if \imm == 0
+//     .if \rd != \rs1
+//       mv \rd, \rs1
+//     .endif
+//     .exitm
+//   .endif
+//   .if \imm >= 24
+//     sw x0, SP_VAR(VAR_A)
+//     sb \rs1, SP_VAR_BYTE(VAR_A, 3)
+//     lw \rd, SP_VAR(VAR_A)
+//     slli \rd, \rd, (\imm - 24)
+//     .exitm
+//   .endif
+//   .if \imm >= 16
+//     sw x0, SP_VAR(VAR_A)
+//     sh \rs1, SP_VAR_BYTE(VAR_A, 2)
+//     lw \rd, SP_VAR(VAR_A)
+//     slli \rd, \rd, (\imm - 16)
+//     .exitm
+//   .endif
+//   SET_DEBUG_LABEL(slli)
+//   add \rd, \rs1, \rs1
+//   .rept (\imm - 1)
+//     add \rd, \rd, \rd
+//   .endr
+// .endm
 
-.macro srli rd, rs1, imm
-  SET_DEBUG_LABEL(srli)
-  shift_right_template \rd, \rs1, \imm, 0, 1
-.endm
+// .macro srli rd, rs1, imm
+//   SET_DEBUG_LABEL(srli)
+//   shift_right_template \rd, \rs1, \imm, 0, 1
+// .endm
 
-.macro srai rd, rs1, imm
-  SET_DEBUG_LABEL(srai)
-  shift_right_template \rd, \rs1, \imm, 1, 1
-.endm
+// .macro srai rd, rs1, imm
+//   SET_DEBUG_LABEL(srai)
+//   shift_right_template \rd, \rs1, \imm, 1, 1
+// .endm
 
 def_itype(slti, slt)
 def_itype(sltiu, sltu)

@@ -11,7 +11,6 @@ AM_SRCS := riscv/npc/start.S \
 CFLAGS    += -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
 LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
-LDFLAGS   += --defsym=_puart_data=0x10000000 --defsym=_puart_status=0x10000004
 LDFLAGS   += --defsym=_ptime_uptime=0x10001000
 LDFLAGS   += --gc-sections -e _start
 
@@ -27,8 +26,17 @@ image: image-dep
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
-TESTER_PATH := /home/bekzat/chip_bootcamp/miniRV
+TESTER_PATH := /home/bekzat/chip_bootcamp
+BIN_PATH := /home/bekzat/chip_bootcamp/bin
+
 run: insert-arg
-	$(TESTER_PATH)/obj_dir/VminiRV bin $(IMAGE).bin
+	$(BIN_PATH)/gen.sh $(IMAGE).elf
+	$(TESTER_PATH)/obj_dir/VysyxSoCTop bin new.bin
+	rm new.bin
+
+# run: insert-arg
+# 	$(BIN_PATH)/gen.sh $(IMAGE).elf
+# 	$(TESTER_PATH)/obj_dir/Vcpu bin new.bin
+# 	rm new.bin
 
 .PHONY: insert-arg

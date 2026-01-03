@@ -1,7 +1,6 @@
 #include <am.h>
 
-extern volatile uint64_t _ptime_uptime;
-
+#define CPU_HZ (5900000UL)
 static uint64_t global_time;
 
 static int is_leap_year(int y) {
@@ -9,16 +8,34 @@ static int is_leap_year(int y) {
   return (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0);
 }
 
+static inline uint64_t read_cycle(void) {
+  uint32_t hi1, lo, hi2;
+  __asm__ volatile ("csrr %0, mcycleh" : "=r"(hi1));
+  __asm__ volatile ("csrr %0, mcycle"  : "=r"(lo));
+  __asm__ volatile ("csrr %0, mcycleh" : "=r"(hi2));
+  if (hi1 != hi2) {
+    __asm__ volatile ("csrr %0, mcycle" : "=r"(lo));
+    hi1 = hi2;
+  }
+  return ((uint64_t)hi1 << 32) | lo;
+}
+
+static inline uint64_t read_time(void) {
+  uint64_t now = read_cycle();
+  uint64_t cycles = now - global_time;
+  return (cycles * 1000000ULL) / (uint64_t)CPU_HZ;
+}
+
 void __am_timer_init() {
-  global_time = _ptime_uptime;
+  global_time = read_time();
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uptime->us = _ptime_uptime - global_time;
+  uptime->us = read_time();
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {
-  uint64_t rtc_us = _ptime_uptime;
+  uint64_t rtc_us = read_time();
   uint64_t total_sec = rtc_us / 1000000ULL; // drop sub-second part
 
   rtc->second = (int)(total_sec % 60);

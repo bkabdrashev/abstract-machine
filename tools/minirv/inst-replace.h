@@ -38,15 +38,15 @@ Limitation:
 #define PUSH(r, n) sw r, SP_VAR(n)
 #define POP(r, n)  lw r, SP_VAR(n)
 
-.section .rodata
-.align 8
-.weak _same_result_table
-_same_result_table: .byte 1, 0, 0, 0, 0, 0, 0, 0
+// .section .rodata
+// .align 8
+// .weak _same_result_table
+// _same_result_table: .byte 1, 0, 0, 0, 0, 0, 0, 0
 
-.weak _check_8bit_0_table
-_check_8bit_0_table:
-.byte 0
-.fill 255, 1, 1
+// .weak _check_8bit_0_table
+// _check_8bit_0_table:
+// .byte 0
+// .fill 255, 1, 1
 
 // # slt = OF ^ SF = ((sign(A) ^ sign(B)) & (sign(A) ^ sign(R))) ^ sign(R)
 // # sltu = slt ^ sign(A) ^ sign(B)
@@ -79,35 +79,36 @@ _check_8bit_0_table:
 // #define _srl8_table (_sll8_table + 32 * 256 * 4)
 // #define _sra8_table (_srl8_table + 32 * 256 * 4)
 
-#define def_itype(name, rtype_name) \
-  .macro name rd, rs1, imm ;\
-    SET_DEBUG_LABEL(name); \
-    li tp, \imm; \
-    rtype_name \rd, \rs1, tp; \
-  .endm
+/* #define def_itype(name, rtype_name) \
+   .macro name rd, rs1, imm ;\
+     SET_DEBUG_LABEL(name); \
+     li tp, \imm; \
+     rtype_name \rd, \rs1, tp; \
+   .endm
+*/
 
-.section .data
-.align 8
-.weak _check_same_array  # unnecessary to initialize
-_check_same_array: .fill 256, 1, 0
+// .section .data
+// .align 8
+// .weak _check_same_array  # unnecessary to initialize
+// _check_same_array: .fill 256, 1, 0
 
 .macro call_template r, addr
   la \r, \addr
   jalr \r, \r
 .endm
 
-.macro jal rd, addr
-  SET_DEBUG_LABEL(jal)
-  .if \rd == zero
-    j \addr
-  .else
-  .if \rd == x0
-    j \addr
-  .else
-    call_template \rd, \addr
-  .endif
-  .endif
-.endm
+// .macro jal rd, addr
+//   SET_DEBUG_LABEL(jal)
+//   .if \rd == zero
+//     j \addr
+//   .else
+//   .if \rd == x0
+//     j \addr
+//   .else
+//     call_template \rd, \addr
+//   .endif
+//   .endif
+// .endm
 
 // .macro sub rd, rs1, rs2
 //   SET_DEBUG_LABEL(sub)
@@ -116,16 +117,16 @@ _check_same_array: .fill 256, 1, 0
 //   addi \rd, \rd, 1
 // .endm
 
-.macro getbyte rd, rs1, byte
-  sw \rs1, SP_VAR(VAR_C)
-  lbu \rd, SP_VAR_BYTE(VAR_C, \byte)
-.endm
+// .macro getbyte rd, rs1, byte
+//   sw \rs1, SP_VAR(VAR_C)
+//   lbu \rd, SP_VAR_BYTE(VAR_C, \byte)
+// .endm
 
-.macro msb rd, rs1
-  getbyte \rd, \rs1, 3
-  slli \rd, \rd, 1
-  getbyte \rd, \rd, 1
-.endm
+// .macro msb rd, rs1
+//   getbyte \rd, \rs1, 3
+//   slli \rd, \rd, 1
+//   getbyte \rd, \rd, 1
+// .endm
 
 // .macro slt_template lut, rd, rs1, rs2
 //   PUSH(s0, 1)
@@ -164,96 +165,97 @@ _check_same_array: .fill 256, 1, 0
 //   slt_template _sltu1_table, \rd, \rs1, \rs2
 // .endm
 
-.macro logic8_byte_internal lut_reg, boffset
-  lbu tp, SP_VAR_BYTE(VAR_A, \boffset)
-  sb tp, SP_VAR_BYTE(VAR_D, 1)
-  lbu tp, SP_VAR_BYTE(VAR_B, \boffset)
-  sb tp, SP_VAR_BYTE(VAR_D, 0)
-  lw tp, SP_VAR(VAR_D)
-  add tp, \lut_reg, tp
-  lbu tp, (tp)
-  sb tp, SP_VAR_BYTE(VAR_C, \boffset)
-.endm
+// .macro logic8_byte_internal lut_reg, boffset
+//   lbu tp, SP_VAR_BYTE(VAR_A, \boffset)
+//   sb tp, SP_VAR_BYTE(VAR_D, 1)
+//   lbu tp, SP_VAR_BYTE(VAR_B, \boffset)
+//   sb tp, SP_VAR_BYTE(VAR_D, 0)
+//   lw tp, SP_VAR(VAR_D)
+//   add tp, \lut_reg, tp
+//   lbu tp, (tp)
+//   sb tp, SP_VAR_BYTE(VAR_C, \boffset)
+// .endm
 
-.macro logic lut, rd, rs1, rs2
-  .if \rd == x0
-    .exitm
-  .endif
-  .if \rd == sp || \rs1 == sp || \rs2 == sp
-    .abort
-  .endif
-  .if \rd == gp || \rs1 == gp || \rs2 == gp
-    .abort
-  .endif
-  .if \rd == tp || \rs1 == tp
-    .abort
-  .endif
-  sw \rs1, SP_VAR(VAR_A)
-  sw \rs2, SP_VAR(VAR_B)
-  la \rd, \lut
-  sw x0, SP_VAR(VAR_D)
+// .macro logic lut, rd, rs1, rs2
+//   .if \rd == x0
+//     .exitm
+//   .endif
+//   .if \rd == sp || \rs1 == sp || \rs2 == sp
+//     .abort
+//   .endif
+//   .if \rd == gp || \rs1 == gp || \rs2 == gp
+//     .abort
+//   .endif
+//   .if \rd == tp || \rs1 == tp
+//     .abort
+//   .endif
+//   sw \rs1, SP_VAR(VAR_A)
+//   sw \rs2, SP_VAR(VAR_B)
+//   la \rd, \lut
+//   sw x0, SP_VAR(VAR_D)
 
-  logic8_byte_internal \rd, 3
-  logic8_byte_internal \rd, 2
-  logic8_byte_internal \rd, 1
-  logic8_byte_internal \rd, 0
+//   logic8_byte_internal \rd, 3
+//   logic8_byte_internal \rd, 2
+//   logic8_byte_internal \rd, 1
+//   logic8_byte_internal \rd, 0
 
-  lw \rd, SP_VAR(VAR_C)
-.endm
+//   lw \rd, SP_VAR(VAR_C)
+// .endm
 
+/*
 #define def_logic(name) \
-  .macro name rd, rs1, rs2 ;\
-    SET_DEBUG_LABEL(name); \
-    logic concat(_, concat(name, 8_table)), \rd, \rs1, \rs2; \
-  .endm
+   .macro name rd, rs1, rs2 ;\
+     SET_DEBUG_LABEL(name); \
+     logic concat(_, concat(name, 8_table)), \rd, \rs1, \rs2; \
+   .endm
+*/
 
 // def_logic(and)
 // def_logic(or)
 // def_logic(xor)
 
 
-.macro check_8bit_same table, rd, boffset  # rd == 0 if same
-  lbu \rd, SP_VAR_BYTE(VAR_A, \boffset)
-  add tp, \table, \rd
-  addi \rd, x0, 1
-  sb \rd, (tp)
+// .macro check_8bit_same table, rd, boffset  # rd == 0 if same
+//   lbu \rd, SP_VAR_BYTE(VAR_A, \boffset)
+//   add tp, \table, \rd
+//   addi \rd, x0, 1
+//   sb \rd, (tp)
 
-  lbu \rd, SP_VAR_BYTE(VAR_B, \boffset)
-  add \rd, \table, \rd
-  sb x0, (\rd)
+//   lbu \rd, SP_VAR_BYTE(VAR_B, \boffset)
+//   add \rd, \table, \rd
+//   sb x0, (\rd)
 
-  lbu \rd, (tp)
-.endm
+//   lbu \rd, (tp)
+// .endm
 
-// TODO: remove when BEQ, BNE are implemented
-.macro seq rd, rs1, rs2   # set equal
-  sw \rs1, SP_VAR(VAR_A)
-  sw \rs2, SP_VAR(VAR_B)
-  PUSH(s0, 1)
-  PUSH(s1, 2)
+// .macro seq rd, rs1, rs2   # set equal
+//   sw \rs1, SP_VAR(VAR_A)
+//   sw \rs2, SP_VAR(VAR_B)
+//   PUSH(s0, 1)
+//   PUSH(s1, 2)
 
-  la s0, _check_same_array
-  check_8bit_same s0, gp, 0
-  check_8bit_same s0, s1, 1
-  add gp, gp, s1
-  check_8bit_same s0, s1, 2
-  add gp, gp, s1
-  check_8bit_same s0, s1, 3
-  add gp, gp, s1
+//   la s0, _check_same_array
+//   check_8bit_same s0, gp, 0
+//   check_8bit_same s0, s1, 1
+//   add gp, gp, s1
+//   check_8bit_same s0, s1, 2
+//   add gp, gp, s1
+//   check_8bit_same s0, s1, 3
+//   add gp, gp, s1
 
-  la tp, _same_result_table
-  add tp, tp, gp
-  lbu \rd, (tp)
+//   la tp, _same_result_table
+//   add tp, tp, gp
+//   lbu \rd, (tp)
 
-  POP(s1, 2)
-  POP(s0, 1)
-.endm
+//   POP(s1, 2)
+//   POP(s0, 1)
+// .endm
 
-.macro check_8bit_0 table, rd, boffset  # rd = (source is 0 ? 0 : 1)
-  lbu \rd, SP_VAR_BYTE(VAR_A, \boffset)
-  add \rd, \table, \rd
-  lbu \rd, (\rd)
-.endm
+// .macro check_8bit_0 table, rd, boffset  # rd = (source is 0 ? 0 : 1)
+//   lbu \rd, SP_VAR_BYTE(VAR_A, \boffset)
+//   add \rd, \table, \rd
+//   lbu \rd, (\rd)
+// .endm
 
 // .macro seqz rd, rs1   # set if 0
 //   sw \rs1, SP_VAR(VAR_A)
@@ -277,112 +279,112 @@ _check_same_array: .fill 256, 1, 0
 
 #define SET_BRANCH_LABEL(name) concat(name, _\@\target):
 
-.macro branch_resolve target, is_tp_high_sel_target, label
-#define LABEL_NAME non_taken_\label\target
-  slli tp, tp, 2  # tp = tp * 4
-  add  tp, sp, tp
-  .if \is_tp_high_sel_target == 1
-    la gp, \target
-    sw gp, SP_VAR(VAR_A)  # higher address
-    la gp, LABEL_NAME
-    sw gp, SP_VAR(VAR_B)  # lower address
-  .else
-    la gp, LABEL_NAME
-    sw gp, SP_VAR(VAR_A)  # higher address
-    la gp, \target
-    sw gp, SP_VAR(VAR_B)  # lower address
-  .endif
-  lw tp, (-VAR_B * 4)(tp)
-  jr tp
+// .macro branch_resolve target, is_tp_high_sel_target, label
+// #define LABEL_NAME non_taken_\label\target
+//   slli tp, tp, 2  # tp = tp * 4
+//   add  tp, sp, tp
+//   .if \is_tp_high_sel_target == 1
+//     la gp, \target
+//     sw gp, SP_VAR(VAR_A)  # higher address
+//     la gp, LABEL_NAME
+//     sw gp, SP_VAR(VAR_B)  # lower address
+//   .else
+//     la gp, LABEL_NAME
+//     sw gp, SP_VAR(VAR_A)  # higher address
+//     la gp, \target
+//     sw gp, SP_VAR(VAR_B)  # lower address
+//   .endif
+//   lw tp, (-VAR_B * 4)(tp)
+//   jr tp
 
-LABEL_NAME:
-.endm
+// LABEL_NAME:
+// .endm
 
 
-.macro beq rs1, rs2, target
-  SET_BRANCH_LABEL(beq)
-  .if \rs2 == zero || \rs2 == x0
-    seqz tp, \rs1
-  .else
-    .if \rs1 == zero || \rs1 == x0
-      beq \rs2, \rs1, \target
-      .exitm
-    .else
-      seq tp, \rs1, \rs2
-    .endif
-  .endif
-  branch_resolve \target, 1, \@
-.endm
+// .macro beq rs1, rs2, target
+//   SET_BRANCH_LABEL(beq)
+//   .if \rs2 == zero || \rs2 == x0
+//     seqz tp, \rs1
+//   .else
+//     .if \rs1 == zero || \rs1 == x0
+//       beq \rs2, \rs1, \target
+//       .exitm
+//     .else
+//       seq tp, \rs1, \rs2
+//     .endif
+//   .endif
+//   branch_resolve \target, 1, \@
+// .endm
 
-.macro bne rs1, rs2, target
-  SET_BRANCH_LABEL(bne)
-  .if \rs2 == zero || \rs2 == x0
-    seqz tp, \rs1
-  .else
-    .if \rs1 == zero || \rs1 == x0
-      bne \rs2, \rs1, \target
-      .exitm
-    .else
-      seq tp, \rs1, \rs2
-    .endif
-  .endif
-  branch_resolve \target, 0, \@
-.endm
+// .macro bne rs1, rs2, target
+//   SET_BRANCH_LABEL(bne)
+//   .if \rs2 == zero || \rs2 == x0
+//     seqz tp, \rs1
+//   .else
+//     .if \rs1 == zero || \rs1 == x0
+//       bne \rs2, \rs1, \target
+//       .exitm
+//     .else
+//       seq tp, \rs1, \rs2
+//     .endif
+//   .endif
+//   branch_resolve \target, 0, \@
+// .endm
 
-.macro blt rs1, rs2, target
-  SET_BRANCH_LABEL(blt)
-  .if \rs2 == zero || \rs2 == x0
-    msb tp, \rs1
-    branch_resolve \target, 1, \@
-  .else
-    .if \rs1 == zero || \rs1 == x0
-      # check rs2 > 0 ?
-      # msb(rs2) == 0 && msb(rs2 - 1) == 0
-      msb gp, \rs2
-      addi tp, \rs2, -1
-      msb tp, tp
-      add gp, gp, tp
-      la tp, _or1_table
-      add tp, gp, tp
-      lbu tp, (tp)  # tp == 1 -> not taken
-      branch_resolve \target, 0, \@
-    .else
-      slt tp, \rs1, \rs2
-      branch_resolve \target, 1, \@
-    .endif
-  .endif
-.endm
+// .macro blt rs1, rs2, target
+//   SET_BRANCH_LABEL(blt)
+//   .if \rs2 == zero || \rs2 == x0
+//     msb tp, \rs1
+//     branch_resolve \target, 1, \@
+//   .else
+//     .if \rs1 == zero || \rs1 == x0
+//       # check rs2 > 0 ?
+//       # msb(rs2) == 0 && msb(rs2 - 1) == 0
+//       msb gp, \rs2
+//       addi tp, \rs2, -1
+//       msb tp, tp
+//       add gp, gp, tp
+//       la tp, _or1_table
+//       add tp, gp, tp
+//       lbu tp, (tp)  # tp == 1 -> not taken
+//       branch_resolve \target, 0, \@
+//     .else
+//       slt tp, \rs1, \rs2
+//       branch_resolve \target, 1, \@
+//     .endif
+//   .endif
+// .endm
 
-.macro bltu rs1, rs2, target
-  SET_BRANCH_LABEL(bltu)
-  sltu tp, \rs1, \rs2
-  branch_resolve \target, 1, \@
-.endm
+// .macro bltu rs1, rs2, target
+//   SET_BRANCH_LABEL(bltu)
+//   sltu tp, \rs1, \rs2
+//   branch_resolve \target, 1, \@
+// .endm
 
-.macro bge rs1, rs2, target
-  SET_BRANCH_LABEL(bge)
-  .if \rs1 == zero || \rs1 == x0
-    # check rs2 <= 0 ?
-    # msb(rs2) == 1 || msb(rs2 - 1) == 1
-    msb gp, \rs2
-    addi tp, \rs2, -1
-    msb tp, tp
-    add gp, gp, tp
-    la tp, _or1_table
-    add tp, gp, tp
-    lbu tp, (tp)
-    branch_resolve \target, 1, \@
-  .else
-    slt tp, \rs1, \rs2
-    branch_resolve \target, 0, \@
-  .endif
-.endm
+// .macro bge rs1, rs2, target
+//   SET_BRANCH_LABEL(bge)
+//   .if \rs1 == zero || \rs1 == x0
+//     # check rs2 <= 0 ?
+//     # msb(rs2) == 1 || msb(rs2 - 1) == 1
+//     msb gp, \rs2
+//     addi tp, \rs2, -1
+//     msb tp, tp
+//     add gp, gp, tp
+//     la tp, _or1_table
+//     add tp, gp, tp
+//     lbu tp, (tp)
+//     branch_resolve \target, 1, \@
+//   .else
+//     slt tp, \rs1, \rs2
+//     branch_resolve \target, 0, \@
+//   .endif
+// .endm
 
-.macro bgeu rs1, rs2, target
-  SET_BRANCH_LABEL(bgeu)
-  sltu tp, \rs1, \rs2
-  branch_resolve \target, 0, \@
-.endm
+// .macro bgeu rs1, rs2, target
+//   SET_BRANCH_LABEL(bgeu)
+//   sltu tp, \rs1, \rs2
+//   branch_resolve \target, 0, \@
+// .endm
 
 // .macro getshamt rd, rs1
 //   sb \rs1, SP_VAR_BYTE(VAR_B, 0)

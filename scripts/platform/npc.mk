@@ -31,7 +31,7 @@ BIN_PATH := /home/bekzat/chip_bootcamp/bin
 
 run: insert-arg
 	$(BIN_PATH)/gen.sh $(IMAGE).elf
-	$(TESTER_PATH)/obj_dir/VysyxSoCTop bin new.bin
+	$(TESTER_PATH)/build_run_soc.sh bin new.bin vsoc
 	rm new.bin
 
 # run: insert-arg

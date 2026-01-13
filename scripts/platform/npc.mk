@@ -18,14 +18,14 @@ MAINARGS_MAX_LEN = 64
 MAINARGS_PLACEHOLDER = the_insert-arg_rule_in_Makefile_will_insert_mainargs_here
 CFLAGS += -DMAINARGS_MAX_LEN=$(MAINARGS_MAX_LEN) -DMAINARGS_PLACEHOLDER=$(MAINARGS_PLACEHOLDER)
 
-ELF_BASE := $(IMAGE).elf.base
+ELF_BASE := $(IMAGE).base.elf
+ELF_RUN  := $(IMAGE).run.elf
 
 $(ELF_BASE): image-dep
 	@cp $(IMAGE).elf $(ELF_BASE)
 
 insert-arg: $(ELF_BASE)
-	@cp $(ELF_BASE) $(IMAGE).elf
-	@python $(AM_HOME)/tools/insert-arg.py $(IMAGE).elf $(MAINARGS_MAX_LEN) $(MAINARGS_PLACEHOLDER) "$(mainargs)"
+	@python $(AM_HOME)/tools/insert-arg.py $(ELF_BASE) $(ELF_RUN) $(MAINARGS_MAX_LEN) $(MAINARGS_PLACEHOLDER) "$(mainargs)"
 
 image: image-dep
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
@@ -36,7 +36,7 @@ TESTER_PATH := /home/bekzat/chip_bootcamp
 BIN_PATH := /home/bekzat/chip_bootcamp/bin
 
 run: insert-arg
-	$(BIN_PATH)/gen.sh $(IMAGE).elf
+	$(BIN_PATH)/gen.sh $(ELF_RUN)
 	$(TESTER_PATH)/build_run_soc.sh fast bin new.bin "$(cpu)" verbose "$(verbose)"
 	rm new.bin
 

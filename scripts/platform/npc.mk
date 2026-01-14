@@ -28,9 +28,9 @@ insert-arg: $(ELF_BASE)
 	@python $(AM_HOME)/tools/insert-arg.py $(ELF_BASE) $(ELF_RUN) $(MAINARGS_MAX_LEN) $(MAINARGS_PLACEHOLDER) "$(mainargs)"
 
 image: image-dep
-	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
+	@$(OBJDUMP) -d $(IMAGE).base.elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
-	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
+	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).base.elf $(IMAGE).bin
 
 TESTER_PATH := /home/bekzat/chip_bootcamp
 BIN_PATH := /home/bekzat/chip_bootcamp/bin

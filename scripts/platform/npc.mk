@@ -24,10 +24,10 @@ ELF_RUN  := $(IMAGE).run.elf
 $(ELF_BASE): image-dep
 	@cp $(IMAGE).elf $(ELF_BASE)
 
-insert-arg: $(ELF_BASE)
+insert-arg: image
 	@python $(AM_HOME)/tools/insert-arg.py $(ELF_BASE) $(ELF_RUN) $(MAINARGS_MAX_LEN) $(MAINARGS_PLACEHOLDER) "$(mainargs)"
 
-image: image-dep
+image: $(ELF_BASE)
 	@$(OBJDUMP) -d $(IMAGE).base.elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).base.elf $(IMAGE).bin

@@ -11,6 +11,7 @@ AM_SRCS := riscv/npc/start.S \
 CFLAGS    += -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
 LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
+# LDFLAGS   += --defsym=_pflash_start=0x80000000
 LDFLAGS   += --defsym=_ptime_uptime=0x10001000
 LDFLAGS   += --gc-sections -e _start
 

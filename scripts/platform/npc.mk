@@ -38,7 +38,7 @@ BIN_PATH := /home/bekzat/chip_bootcamp/bin
 
 run: insert-arg
 	$(BIN_PATH)/gen.sh $(ELF_RUN)
-	$(TESTER_PATH)/build_run.sh fast check bin new.bin "$(cpu)" verbose "$(verbose)"
+	$(TESTER_PATH)/build_run.sh fast check bin new.bin "$(cpu)" verbose "$(verbose)" measure "$(measure_path)"
 	rm new.bin
 
 .PHONY: insert-arg run
